@@ -114,9 +114,9 @@ def bet_session():
                 target_threshold = highest_bankroll + float(session['base_bet'])
                 
                 if new_bankroll < target_threshold and (session['net_profit'] + round_profit) < session['profit_target']:
-                    # Keep the same bet after a win if we haven't reached threshold
-                    next_bet = float(actual_bet)
-                    logging.debug(f"Win: Keeping bet at {next_bet} (threshold not reached)")
+                    # Increase bet by 1 unit after a win if we haven't reached threshold
+                    next_bet = float(actual_bet) + float(session['base_bet'])
+                    logging.debug(f"Win: Increasing bet to {next_bet} (threshold not reached)")
                 else:
                     # Reset to base bet if we reached threshold or profit target
                     next_bet = float(session['base_bet'])
@@ -129,9 +129,9 @@ def bet_session():
                 round_profit = -float(actual_bet)
                 new_bankroll = session['current_bankroll'] + round_profit
                 
-                # After a loss, increase bet by 1 unit
-                next_bet = float(actual_bet) + float(session['base_bet'])
-                logging.debug(f"Loss: Increasing bet to {next_bet}")
+                # Keep bet the same after a loss (Oscar Grind strategy)
+                next_bet = float(actual_bet)
+                logging.debug(f"Loss: Keeping bet at {next_bet}")
             
             # Ensure bet doesn't exceed bankroll
             if next_bet > new_bankroll:
