@@ -139,6 +139,7 @@
                                 <th>Result</th>
                                 <th>Profit/Loss</th>
                                 <th>Bankroll</th>
+                                <th>Next Bet</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -165,11 +166,18 @@
                                         ${{ "%.2f"|format(bet.profit_loss) }}
                                     </td>
                                     <td>${{ "%.2f"|format(bet.bankroll) }}</td>
+                                    <td>
+                                        {% if bet.next_bet is defined %}
+                                        ${{ "%.2f"|format(bet.next_bet) }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-3 text-muted">
+                                    <td colspan="6" class="text-center py-3 text-muted">
                                         <i class="fas fa-info-circle me-2"></i> No bets placed yet
                                     </td>
                                 </tr>

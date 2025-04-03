@@ -47,6 +47,7 @@ def index():
             # Initialize session variables
             session['starting_bankroll'] = float(bankroll)
             session['current_bankroll'] = float(bankroll)
+            session['highest_bankroll'] = float(bankroll)
             session['base_bet'] = float(base_bet)
             session['profit_target'] = float(profit_target)
             session['current_bet'] = float(base_bet)
@@ -95,31 +96,47 @@ def bet_session():
             
             # Update bankroll and history based on result
             round_profit = 0
+            next_bet = float(session['base_bet'])  # Default to base bet
             
             if result == 'win':
                 # Win scenario
                 round_profit = float(actual_bet)
                 new_bankroll = session['current_bankroll'] + round_profit
+
+                # Update highest bankroll if needed
+                highest_bankroll = session['highest_bankroll']
+                if new_bankroll > highest_bankroll:
+                    session['highest_bankroll'] = float(new_bankroll)
+                    highest_bankroll = new_bankroll
                 
-                # Apply Oscar Grind strategy for next bet
-                if (session['net_profit'] + round_profit) < session['profit_target']:
-                    # Increase bet by 1 unit if profit target not reached
-                    next_bet = float(actual_bet) + float(session['base_bet'])
+                # Modified Oscar Grind strategy for next bet
+                # Check if net profit < highest bankroll + 1 unit
+                target_threshold = highest_bankroll + float(session['base_bet'])
+                
+                if new_bankroll < target_threshold and (session['net_profit'] + round_profit) < session['profit_target']:
+                    # Keep the same bet after a win if we haven't reached threshold
+                    next_bet = float(actual_bet)
+                    logging.debug(f"Win: Keeping bet at {next_bet} (threshold not reached)")
                 else:
-                    # Reset to base bet if profit target reached
+                    # Reset to base bet if we reached threshold or profit target
                     next_bet = float(session['base_bet'])
-                    flash('Profit target reached! Bet reset to base amount.', 'success')
+                    if new_bankroll >= target_threshold:
+                        flash(f'Reached highest bankroll + 1 unit threshold! Bet reset to base amount.', 'success')
+                    if (session['net_profit'] + round_profit) >= session['profit_target']:
+                        flash('Profit target reached! Bet reset to base amount.', 'success')
             else:
                 # Loss scenario
                 round_profit = -float(actual_bet)
                 new_bankroll = session['current_bankroll'] + round_profit
                 
-                # Keep bet the same after a loss (Oscar Grind strategy)
-                next_bet = float(actual_bet)
+                # After a loss, increase bet by 1 unit
+                next_bet = float(actual_bet) + float(session['base_bet'])
+                logging.debug(f"Loss: Increasing bet to {next_bet}")
             
             # Ensure bet doesn't exceed bankroll
             if next_bet > new_bankroll:
                 next_bet = float(new_bankroll)
+                logging.debug(f"Limiting bet to {next_bet} (cannot exceed bankroll)")
             
             # Update session data
             round_number = session['round_number']
@@ -128,7 +145,7 @@ def bet_session():
             session['current_bet'] = float(next_bet)
             session['round_number'] = round_number + 1
             
-            # Add to history
+            # Add to history with next suggested bet
             bet_history = session.get('bet_history', [])
             bet_history.append({
                 'round': round_number,
@@ -136,6 +153,7 @@ def bet_session():
                 'result': result,
                 'profit_loss': round_profit,
                 'bankroll': float(new_bankroll),
+                'next_bet': float(next_bet),
                 'followed_suggestion': bet_matches_suggestion
             })
             session['bet_history'] = bet_history
@@ -156,6 +174,7 @@ def bet_session():
     return render_template('session.html', 
                           starting_bankroll=session['starting_bankroll'],
                           current_bankroll=session['current_bankroll'], 
+                          highest_bankroll=session['highest_bankroll'],
                           base_bet=session['base_bet'],
                           profit_target=session['profit_target'],
                           current_bet=session['current_bet'],
