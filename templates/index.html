@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0 text-center">Baccarat Oscar Grind Tracker</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">Oscar Grind Strategy Explained</h5>
+                    <p class="mb-0">The Oscar Grind is a positive progression betting system:</p>
+                    <ul>
+                        <li>After a <strong>win</strong>, if you haven't reached your profit target: Increase your bet by 1 unit</li>
+                        <li>After a <strong>win</strong>, if you've reached your profit target: Reset bet to base amount</li>
+                        <li>After a <strong>loss</strong>: Keep bet amount unchanged</li>
+                    </ul>
+                    <p class="mb-0">This strategy aims for small, consistent profits rather than large wins.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('index') }}" id="setupForm">
+                    <div class="mb-3">
+                        <label for="bankroll" class="form-label">Starting Bankroll ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="bankroll" name="bankroll" value="{{ bankroll }}" min="1" required>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="right" title="The total amount of money you start with">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="base_bet" class="form-label">Base Bet Unit ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="base_bet" name="base_bet" value="{{ base_bet }}" min="1" required>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="right" title="Your minimum bet amount and the unit by which bets increase">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="profit_target" class="form-label">Profit Target ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="profit_target" name="profit_target" value="{{ profit_target }}" min="1" required>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="right" title="The profit amount you aim to reach before resetting your bet">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play me-2"></i> Start Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title mb-0">About Baccarat</h3>
+            </div>
+            <div class="card-body">
+                <p>Baccarat is a card game played at casinos. There are three popular variants of the game: 
+                <strong>punto banco</strong> (North American baccarat), <strong>baccarat chemin de fer</strong>, and <strong>baccarat banque</strong>.</p>
+                
+                <p>In the most common version, players bet on either:</p>
+                <ul>
+                    <li><strong>Player</strong> (punto)</li>
+                    <li><strong>Banker</strong> (banco)</li>
+                    <li><strong>Tie</strong></li>
+                </ul>
+                
+                <p>The hand with a value closest to 9 wins. This tracker helps you apply the Oscar Grind betting strategy to your baccarat games.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Enable all tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

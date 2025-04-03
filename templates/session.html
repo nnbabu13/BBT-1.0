@@ -1,0 +1,213 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Dashboard Column -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Session Dashboard</h3>
+            </div>
+            <div class="card-body">
+                <!-- Bankroll Display -->
+                <div class="mb-4">
+                    <h5>Current Bankroll</h5>
+                    <div class="display-6 fw-bold mb-2 {% if current_bankroll > starting_bankroll %}text-success{% elif current_bankroll < starting_bankroll %}text-danger{% endif %}">
+                        ${{ "%.2f"|format(current_bankroll) }}
+                    </div>
+                    <div class="progress mb-2" style="height: 20px;">
+                        {% set percentage = 100 if starting_bankroll == 0 else (current_bankroll / starting_bankroll * 100)|round|int %}
+                        <div class="progress-bar {% if percentage >= 100 %}bg-success{% elif percentage >= 50 %}bg-info{% elif percentage >= 25 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ percentage if percentage > 0 else 0 }}%;" 
+                             aria-valuenow="{{ percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ percentage }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">Starting: ${{ "%.2f"|format(starting_bankroll) }}</small>
+                </div>
+
+                <!-- Net Profit Display -->
+                <div class="mb-4">
+                    <h5>Net Profit</h5>
+                    <div class="h3 fw-bold {% if net_profit > 0 %}text-success{% elif net_profit < 0 %}text-danger{% else %}text-muted{% endif %}">
+                        {% if net_profit > 0 %}+{% endif %}${{ "%.2f"|format(net_profit) }}
+                    </div>
+                    <div class="progress mb-2" style="height: 20px;">
+                        {% set profit_percentage = 100 if profit_target == 0 else (net_profit / profit_target * 100)|round|int %}
+                        <div class="progress-bar {% if profit_percentage >= 100 %}bg-success{% elif profit_percentage >= 50 %}bg-info{% elif profit_percentage >= 0 %}bg-warning{% else %}bg-danger{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ profit_percentage if profit_percentage > 0 else 0 }}%;" 
+                             aria-valuenow="{{ profit_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ profit_percentage if profit_percentage > 0 else 0 }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">Target: ${{ "%.2f"|format(profit_target) }}</small>
+                </div>
+
+                <!-- Next Bet -->
+                <div class="mb-4">
+                    <h5>Next Suggested Bet</h5>
+                    <div class="h3 fw-bold">${{ "%.2f"|format(current_bet) }}</div>
+                    <small class="text-muted">Base unit: ${{ "%.2f"|format(base_bet) }}</small>
+                </div>
+
+                <!-- Session Information -->
+                <div class="mb-4">
+                    <h5>Session Information</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Round Number
+                            <span class="badge bg-primary rounded-pill">{{ round_number }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Bets Placed
+                            <span class="badge bg-secondary rounded-pill">{{ bet_history|length }}</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Reset Button -->
+                <form action="{{ url_for('reset_session') }}" method="POST" class="mt-4">
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reset this session? All progress will be lost.');">
+                            <i class="fas fa-redo-alt me-2"></i> Reset Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Betting Column -->
+    <div class="col-lg-8">
+        <!-- Bet Form -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Place Your Bet</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('bet_session') }}" id="betForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="actual_bet" class="form-label">Bet Amount ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="actual_bet" name="actual_bet" 
+                                       value="{{ "%.2f"|format(current_bet) }}" step="0.01" min="0.01" 
+                                       max="{{ current_bankroll }}" required>
+                            </div>
+                            <div class="form-text" id="betWarning" style="display: none; color: #ffc107;">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Warning: This bet differs from the suggested amount.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="result" class="form-label">Bet Result</label>
+                            <select class="form-select" id="result" name="result" required>
+                                <option value="" selected disabled>Select outcome</option>
+                                <option value="win">Win</option>
+                                <option value="loss">Loss</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check-circle me-2"></i> Submit Result
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bet History -->
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h3 class="card-title mb-0">Bet History</h3>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Round</th>
+                                <th>Bet Amount</th>
+                                <th>Result</th>
+                                <th>Profit/Loss</th>
+                                <th>Bankroll</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if bet_history|length > 0 %}
+                                {% for bet in bet_history|reverse %}
+                                <tr>
+                                    <td>{{ bet.round }}</td>
+                                    <td>
+                                        ${{ "%.2f"|format(bet.bet_amount) }}
+                                        {% if not bet.followed_suggestion %}
+                                        <i class="fas fa-exclamation-triangle text-warning" data-bs-toggle="tooltip" 
+                                           title="Custom bet amount (different from suggestion)"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if bet.result == 'win' %}
+                                        <span class="badge bg-success">Win</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Loss</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="{% if bet.profit_loss > 0 %}text-success{% elif bet.profit_loss < 0 %}text-danger{% endif %}">
+                                        {% if bet.profit_loss > 0 %}+{% endif %}
+                                        ${{ "%.2f"|format(bet.profit_loss) }}
+                                    </td>
+                                    <td>${{ "%.2f"|format(bet.bankroll) }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-3 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i> No bets placed yet
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Bet warning logic
+        const suggestedBet = {{ current_bet }};
+        const actualBetInput = document.getElementById('actual_bet');
+        const betWarning = document.getElementById('betWarning');
+        
+        actualBetInput.addEventListener('input', function() {
+            // Parse values to 2 decimal places for comparison to avoid floating point issues
+            const actualValue = parseFloat(this.value).toFixed(2);
+            const suggestedValue = suggestedBet.toFixed(2);
+            
+            if (actualValue !== suggestedValue) {
+                betWarning.style.display = 'block';
+            } else {
+                betWarning.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
