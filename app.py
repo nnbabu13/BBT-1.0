@@ -102,42 +102,53 @@ def bet_session():
                 # Win scenario
                 round_profit = float(actual_bet)
                 new_bankroll = session['current_bankroll'] + round_profit
-
-                # Update highest bankroll if needed
-                highest_bankroll = session['highest_bankroll']
-                if new_bankroll > highest_bankroll:
-                    session['highest_bankroll'] = float(new_bankroll)
-                    highest_bankroll = new_bankroll
-                
-                # Modified Oscar Grind strategy for next bet
-                # Check if net profit < highest bankroll + 1 unit
-                target_threshold = highest_bankroll + float(session['base_bet'])
                 base_bet = float(session['base_bet'])
                 
-                if new_bankroll >= target_threshold:
-                    # Reset to base bet if we reached or exceeded threshold
-                    next_bet = base_bet
-                    flash(f'Reached highest bankroll + 1 unit threshold! Bet reset to base amount.', 'success')
-                elif (session['net_profit'] + round_profit) >= session['profit_target']:
-                    # Reset to base bet if profit target reached
-                    next_bet = base_bet
-                    flash('Profit target reached! Bet reset to base amount.', 'success')
-                else:
-                    # Calculate how far we are from threshold
-                    distance_to_threshold = target_threshold - new_bankroll
+                # Get current highest bankroll
+                highest_bankroll = session['highest_bankroll']
+                target_threshold = highest_bankroll + base_bet
+                
+                # Case 2: If Win takes bankroll > highest_bankroll + 1 base unit
+                if new_bankroll > target_threshold:
+                    # Update highest bankroll
+                    session['highest_bankroll'] = float(new_bankroll)
+                    logging.debug(f"Win exceeded threshold, updating highest bankroll to {new_bankroll}")
                     
-                    if distance_to_threshold < base_bet:
-                        # If next win would exceed threshold, adjust bet to exactly reach threshold
-                        # Find the largest multiple of base_bet that's <= distance_to_threshold
-                        bet_units = int(distance_to_threshold / base_bet)
-                        if bet_units == 0:
-                            bet_units = 1  # Minimum of 1 unit
-                        next_bet = bet_units * base_bet
-                        logging.debug(f"Win: Adjusting bet to {next_bet} to reach threshold exactly")
+                    # Reset to base bet (ignore standard progression)
+                    next_bet = base_bet
+                    flash(f'Bankroll exceeded highest + 1 unit threshold! Bet reset to base amount.', 'success')
+                    logging.debug(f"Win: Resetting bet to {next_bet} (exceeded threshold)")
+                    
+                # Case 1: Win takes bankroll ≤ highest_bankroll + 1 base unit
+                else:
+                    # Check if we've exactly reached the threshold
+                    if new_bankroll == target_threshold:
+                        # Reset to base bet
+                        next_bet = base_bet
+                        flash(f'Reached highest bankroll + 1 unit threshold! Bet reset to base amount.', 'success')
+                        logging.debug(f"Win: Resetting bet to {next_bet} (reached threshold exactly)")
+                    
+                    # If profit target reached
+                    elif (session['net_profit'] + round_profit) >= session['profit_target']:
+                        # Reset to base bet
+                        next_bet = base_bet
+                        flash('Profit target reached! Bet reset to base amount.', 'success')
+                        logging.debug(f"Win: Resetting bet to {next_bet} (profit target reached)")
+                    
+                    # Normal progression - increase bet by 1 unit
                     else:
-                        # Increase bet by 1 unit after a win if we haven't reached threshold
-                        next_bet = float(actual_bet) + base_bet
-                        logging.debug(f"Win: Increasing bet to {next_bet} (threshold not reached)")
+                        # Calculate how far we are from threshold
+                        distance_to_threshold = target_threshold - new_bankroll
+                        
+                        if distance_to_threshold < base_bet:
+                            # If next standard win would exceed threshold, adjust bet to exactly reach threshold
+                            bet_units = max(1, int(distance_to_threshold / base_bet))
+                            next_bet = bet_units * base_bet
+                            logging.debug(f"Win: Adjusting bet to {next_bet} to reach threshold exactly")
+                        else:
+                            # Increase bet by 1 unit after a win
+                            next_bet = float(actual_bet) + base_bet
+                            logging.debug(f"Win: Increasing bet to {next_bet} (standard progression)")
                 
                 # Ensure bet amount is in multiples of base bet
                 next_bet = round(next_bet / base_bet) * base_bet
