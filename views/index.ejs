@@ -1,0 +1,148 @@
+<!-- views/index.ejs -->
+<%- include('partials/header') %>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-cog me-2"></i> Setup Your Session
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/">
+                    <div class="mb-3">
+                        <label for="starting_bankroll" class="form-label">Starting Bankroll ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="starting_bankroll" name="starting_bankroll" 
+                                   value="1000" step="10" min="10" required>
+                        </div>
+                        <div class="form-text">The amount of money you're starting with</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="base_bet" class="form-label">Base Bet Unit ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="base_bet" name="base_bet" 
+                                   value="10" step="1" min="1" required>
+                        </div>
+                        <div class="form-text">Your minimum bet amount (all bets will be multiples of this)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="profit_target" class="form-label">Profit Target ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="profit_target" name="profit_target" 
+                                   value="100" step="10" min="10" required>
+                        </div>
+                        <div class="form-text">Your desired profit goal for the session</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i> Start Session
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i> Strategy Information
+                </h3>
+            </div>
+            <div class="card-body">
+                <h4 class="mb-3">Modified Oscar Grind Strategy</h4>
+                
+                <p>This tracker implements a modified Oscar Grind betting strategy for Baccarat with the following rules:</p>
+                
+                <ul class="mb-4">
+                    <li><strong>After a Loss:</strong> Keep the same bet amount for the next round</li>
+                    <li><strong>After a Win:</strong> Increase bet by 1 unit, but only if your net profit is less than your highest bankroll + 1 base unit</li>
+                    <li><strong>Threshold Control:</strong> When a win would push you over your highest bankroll + 1 unit threshold, the bet is automatically reduced to reach that threshold exactly</li>
+                    <li><strong>Reset Condition:</strong> When you reach your highest bankroll + 1 unit, your bet resets to the base amount</li>
+                </ul>
+                
+                <h5 class="mb-3">Example Scenario:</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Round</th>
+                                <th>Bet</th>
+                                <th>Result</th>
+                                <th>Bankroll</th>
+                                <th>Next Bet</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Start</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>$1000</td>
+                                <td>$10</td>
+                                <td>Starting position</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td>1</td>
+                                <td>$10</td>
+                                <td>Loss</td>
+                                <td>$990</td>
+                                <td>$10</td>
+                                <td>After loss, keep same bet</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td>2</td>
+                                <td>$10</td>
+                                <td>Win</td>
+                                <td>$1000</td>
+                                <td>$20</td>
+                                <td>After win, increase by 1 unit</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td>3</td>
+                                <td>$20</td>
+                                <td>Win</td>
+                                <td>$1020</td>
+                                <td>$10</td>
+                                <td>Reached threshold (highest + 1 unit), reset</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td>4</td>
+                                <td>$10</td>
+                                <td>Loss</td>
+                                <td>$1010</td>
+                                <td>$10</td>
+                                <td>After loss, keep same bet</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td>5</td>
+                                <td>$10</td>
+                                <td>Loss</td>
+                                <td>$1000</td>
+                                <td>$10</td>
+                                <td>After loss, keep same bet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i> <strong>Tip:</strong> This strategy is designed to limit your risk while still allowing for consistent profits. The threshold control mechanism prevents excessive progression of bet sizes.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
