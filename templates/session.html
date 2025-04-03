@@ -29,6 +29,18 @@
                     <small class="text-muted">Starting: ${{ "%.2f"|format(starting_bankroll) }}</small>
                 </div>
 
+                <!-- Highest Bankroll Display -->
+                <div class="mb-4">
+                    <h5>Highest Bankroll</h5>
+                    <div class="h5 fw-bold">
+                        ${{ "%.2f"|format(highest_bankroll) }}
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-primary">Threshold (Highest+1 unit):</small>
+                        <small class="text-primary fw-bold">${{ "%.2f"|format(highest_bankroll + base_bet) }}</small>
+                    </div>
+                </div>
+
                 <!-- Net Profit Display -->
                 <div class="mb-4">
                     <h5>Net Profit</h5>
