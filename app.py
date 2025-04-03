@@ -140,19 +140,23 @@ def bet_session():
                         # First, calculate standard next bet (increase by 1 unit)
                         standard_next_bet = float(actual_bet) + base_bet
                         
-                        # Calculate where we'd end up if we bet standard_next_bet and win
-                        potential_bankroll = new_bankroll + standard_next_bet
+                        # Check if betting any amount would exceed threshold on win
+                        # Calculate the exact bet needed for a win to reach the threshold
+                        exact_amount_needed = target_threshold - new_bankroll
                         
-                        # Check if that would exceed threshold
-                        if potential_bankroll > target_threshold:
-                            # Calculate exact bet needed to reach threshold on next win
-                            exact_bet = target_threshold - new_bankroll
-                            
-                            # Convert to nearest multiple of base bet (floor)
-                            bet_units = max(1, int(exact_bet / base_bet))
+                        if exact_amount_needed <= 0:
+                            # We're already at or above the threshold after this win
+                            next_bet = base_bet
+                            logging.debug(f"Win: Already at threshold, reset to base bet {next_bet}")
+                            flash(f'Already at or above threshold! Bet reset to base amount.', 'success')
+                        elif exact_amount_needed < standard_next_bet:
+                            # Calculate bet amount that would make a win exactly reach the threshold
+                            # Round down to the nearest multiple of base_bet
+                            bet_units = max(1, int(exact_amount_needed / base_bet))
                             next_bet = bet_units * base_bet
                             
-                            logging.debug(f"Win: Adjusting next bet to {next_bet} to prevent exceeding threshold on next win")
+                            logging.debug(f"Win: Adjusted bet to {next_bet} to exactly reach threshold on next win (exact amount needed: {exact_amount_needed})")
+                            flash(f'Adjusted bet to reach threshold exactly on next win.', 'info')
                         else:
                             # Standard progression - increase by 1 unit
                             next_bet = standard_next_bet
