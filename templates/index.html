@@ -9,14 +9,21 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <h5 class="alert-heading">Oscar Grind Strategy Explained</h5>
-                    <p class="mb-0">The Oscar Grind is a positive progression betting system:</p>
+                    <h5 class="alert-heading">Modified Oscar Grind Strategy Explained</h5>
+                    <p class="mb-0">This is a modified Oscar Grind positive progression betting system with threshold control:</p>
                     <ul>
-                        <li>After a <strong>win</strong>, if you haven't reached your profit target: Increase your bet by 1 unit</li>
+                        <li>After a <strong>win</strong>, if you haven't reached highest bankroll + 1 unit:
+                            <ul>
+                                <li>Increase your bet by 1 unit (standard progression)</li>
+                                <li>If next win would exceed threshold, adjust bet to reach threshold exactly</li>
+                            </ul>
+                        </li>
+                        <li>After a <strong>win</strong>, if you've reached or exceeded highest bankroll + 1 unit: Reset bet to base amount</li>
                         <li>After a <strong>win</strong>, if you've reached your profit target: Reset bet to base amount</li>
                         <li>After a <strong>loss</strong>: Keep bet amount unchanged</li>
                     </ul>
-                    <p class="mb-0">This strategy aims for small, consistent profits rather than large wins.</p>
+                    <p class="mb-0">Example: If current bankroll is $980, highest + 1 unit threshold is $1000, and progression suggests $40 bet, it will be reduced to $20 since winning would make bankroll exactly $1000.</p>
+                    <p class="mb-0">This modified strategy aims for controlled growth with precise threshold targeting.</p>
                 </div>
 
                 <form method="POST" action="{{ url_for('index') }}" id="setupForm">
