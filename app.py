@@ -137,17 +137,25 @@ def bet_session():
                     
                     # Normal progression - increase bet by 1 unit
                     else:
-                        # Calculate how far we are from threshold
-                        distance_to_threshold = target_threshold - new_bankroll
+                        # First, calculate standard next bet (increase by 1 unit)
+                        standard_next_bet = float(actual_bet) + base_bet
                         
-                        if distance_to_threshold < base_bet:
-                            # If next standard win would exceed threshold, adjust bet to exactly reach threshold
-                            bet_units = max(1, int(distance_to_threshold / base_bet))
+                        # Calculate where we'd end up if we bet standard_next_bet and win
+                        potential_bankroll = new_bankroll + standard_next_bet
+                        
+                        # Check if that would exceed threshold
+                        if potential_bankroll > target_threshold:
+                            # Calculate exact bet needed to reach threshold on next win
+                            exact_bet = target_threshold - new_bankroll
+                            
+                            # Convert to nearest multiple of base bet (floor)
+                            bet_units = max(1, int(exact_bet / base_bet))
                             next_bet = bet_units * base_bet
-                            logging.debug(f"Win: Adjusting bet to {next_bet} to reach threshold exactly")
+                            
+                            logging.debug(f"Win: Adjusting next bet to {next_bet} to prevent exceeding threshold on next win")
                         else:
-                            # Increase bet by 1 unit after a win
-                            next_bet = float(actual_bet) + base_bet
+                            # Standard progression - increase by 1 unit
+                            next_bet = standard_next_bet
                             logging.debug(f"Win: Increasing bet to {next_bet} (standard progression)")
                 
                 # Ensure bet amount is in multiples of base bet
