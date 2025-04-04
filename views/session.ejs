@@ -117,24 +117,15 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Result</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="result" id="win" value="win" autocomplete="off" required>
-                            <label class="btn btn-outline-success" for="win">
-                                <i class="fas fa-trophy me-2"></i> Win
-                            </label>
-                            
-                            <input type="radio" class="btn-check" name="result" id="loss" value="loss" autocomplete="off" required>
-                            <label class="btn btn-outline-danger" for="loss">
-                                <i class="fas fa-times-circle me-2"></i> Loss
-                            </label>
+                        <label class="form-label">Place your bet</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="result" value="win" class="btn btn-success flex-grow-1">
+                                <i class="fas fa-trophy me-1"></i> Win
+                            </button>
+                            <button type="submit" name="result" value="loss" class="btn btn-danger flex-grow-1">
+                                <i class="fas fa-times-circle me-1"></i> Loss
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i> Record Bet
-                        </button>
                     </div>
                 </form>
                 
