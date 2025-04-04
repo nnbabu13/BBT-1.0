@@ -1,8 +1,6 @@
 // main.js - Entry point for the application
+// Import the Express app
 const app = require('./app');
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// For Vercel deployment, we need to export the Express app
+module.exports = app;

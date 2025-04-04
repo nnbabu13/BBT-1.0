@@ -29,7 +29,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'oscar-grind-baccarat-tracker-secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+  cookie: { 
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    secure: process.env.NODE_ENV === 'production' // Use secure cookies in production
+  }
 }));
 
 // Flash message middleware
